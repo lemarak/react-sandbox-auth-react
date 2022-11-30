@@ -1,19 +1,17 @@
-import { updateCurrentUser } from "firebase/auth";
 import React, { useContext, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 
 const SignUpModal = () => {
   const [validation, setValidation] = useState("");
   const { modalState, toggleModals, signUp } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const inputs = useRef([]);
   const addInputs = (el) => {
-    console.log("el", el);
-
     if (el && !inputs.current.includes(el)) {
       inputs.current.push(el);
     }
-    console.log(inputs);
   };
   const formRef = useRef();
 
@@ -36,10 +34,21 @@ const SignUpModal = () => {
       );
       formRef.current.reset();
       setValidation("");
-      console.log(cred);
+      toggleModals("close");
+      navigate("/private/private-home");
     } catch (error) {
-      console.log(error.message);
+      if (error.code === "auth/invalid-email") {
+        setValidation("Email format invalid");
+      }
+      if (error.code === "auth/email-already-in-use") {
+        setValidation("Email already used");
+      }
     }
+  };
+
+  const closeModal = () => {
+    setValidation("");
+    toggleModals("close");
   };
 
   return (
@@ -47,7 +56,7 @@ const SignUpModal = () => {
       {modalState.signUpModal && (
         <div className="position-fixed top-0 vw-100 vh-100">
           <div
-            onClick={() => toggleModals("close")}
+            onClick={closeModal}
             className="w-100 h-100 bg-dark bg-opacity-75"
           ></div>
           <div
@@ -58,10 +67,7 @@ const SignUpModal = () => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Sign Up</h5>
-                  <button
-                    onClick={() => toggleModals("close")}
-                    className="btn-close"
-                  ></button>
+                  <button onClick={closeModal} className="btn-close"></button>
                 </div>
                 <div onSubmit={handleForm} className="modal-body">
                   <form ref={formRef} className="sign-up-form">
