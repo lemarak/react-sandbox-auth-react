@@ -1,10 +1,10 @@
-import React, { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 
-const SignUpModal = () => {
+const SignInModal = () => {
   const [validation, setValidation] = useState("");
-  const { modalState, toggleModals, signUp } = useContext(UserContext);
+  const { modalState, toggleModals, signIn } = useContext(UserContext);
   const navigate = useNavigate();
 
   const inputs = useRef([]);
@@ -17,31 +17,18 @@ const SignUpModal = () => {
   const handleForm = async (e) => {
     e.preventDefault();
     setValidation("");
-    if (
-      (inputs.current[1].value.length || inputs.current[2].value.length) < 6
-    ) {
-      setValidation("6 characters min");
-      return;
-    }
-    if (inputs.current[1].value !== inputs.current[2].value) {
-      setValidation("passwords do not match");
-      return;
-    }
+
     try {
-      const cred = await signUp(
+      const cred = await signIn(
         inputs.current[0].value,
         inputs.current[1].value
       );
+
       setValidation("");
       toggleModals("close");
       navigate("/private/private-home");
     } catch (error) {
-      if (error.code === "auth/invalid-email") {
-        setValidation("Email format invalid");
-      }
-      if (error.code === "auth/email-already-in-use") {
-        setValidation("Email already used");
-      }
+      setValidation("Email/Password incorrect");
     }
   };
 
@@ -52,7 +39,7 @@ const SignUpModal = () => {
 
   return (
     <>
-      {modalState.signUpModal && (
+      {modalState.signInModal && (
         <div className="position-fixed top-0 vw-100 vh-100">
           <div
             onClick={closeModal}
@@ -65,13 +52,13 @@ const SignUpModal = () => {
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Sign Up</h5>
+                  <h5 className="modal-title">Sign In</h5>
                   <button onClick={closeModal} className="btn-close"></button>
                 </div>
                 <div onSubmit={handleForm} className="modal-body">
-                  <form className="sign-up-form">
+                  <form className="sign-in-form">
                     <div className="mb-3">
-                      <label className="form-label" htmlFor="signUpEmail">
+                      <label className="form-label" htmlFor="signInEmail">
                         Email address
                       </label>
                       <input
@@ -80,11 +67,11 @@ const SignUpModal = () => {
                         name="email"
                         required
                         className="form-control"
-                        id="signUpEmail"
+                        id="signInEmail"
                       />
                     </div>
                     <div className="mb-3">
-                      <label className="form-label" htmlFor="signUpPassword">
+                      <label className="form-label" htmlFor="signInPassword">
                         Password
                       </label>
                       <input
@@ -93,20 +80,7 @@ const SignUpModal = () => {
                         name="password"
                         required
                         className="form-control"
-                        id="signUpPassword"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label" htmlFor="signUpPassword">
-                        Repeat password
-                      </label>
-                      <input
-                        ref={addInputs}
-                        type="password"
-                        name="repeatPassword"
-                        required
-                        className="form-control"
-                        id="repeatPassword"
+                        id="signInPassword"
                       />
                     </div>
                     <p className="text-danger mt-1">{validation}</p>
@@ -122,4 +96,4 @@ const SignUpModal = () => {
   );
 };
 
-export default SignUpModal;
+export default SignInModal;
